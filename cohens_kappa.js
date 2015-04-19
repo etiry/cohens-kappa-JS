@@ -207,6 +207,27 @@ Cohen.prototype.kappa = function(reviewer1, reviewer2, numOfCategories, weights)
 }
 
 
+// Convert nominal categories to numeric before computing kappa. 
+Cohen.prototype.nominalConversion = function(nominalCats, nominalRatings) {
+  var conversion = Object.create(null);
+  for (var i = 0; i < nominalCats.length; i++) {
+    var numeric = i + 1;
+    conversion[nominalCats[i]] = numeric;
+  };
+
+  var numericRatings = Object.create(null);
+  for (item in nominalRatings) {
+    if (!conversion.hasOwnProperty(item)) {
+      return new Error("Category array must contain all categories.");
+    }
+
+    var number = conversion[item];
+    numericRatings[item] = number;
+  };
+
+  return numericRatings;
+}
+  
 
 var c = new Cohen();
 module.exports = c;
