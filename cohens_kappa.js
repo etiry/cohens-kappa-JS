@@ -1,22 +1,17 @@
-// TODO: add output of number of movies compared (for when reviewer has not
-// reviewed movies that the user has rated). 
-
-
-// Assumption about format of data: 'user' and 'reviewer' should each be JSON objects
-// with movie titles as keys and 1--5 ratings as values. Important that the ratings
+// Assumption about format of data: 'reviewer1' and 'reviewer2' should each be JSON objects
+// with reviewed items as keys and numerical ratings as values. Important that the ratings
 // be typed as numbers. 
 
-// Example user ratings: {'Terminator': 5, 'Speed': 3, 'Aliens': 5, 'Point Break': 2, 'Red Dawn': 2, 'Blond on Blond': 1};
-// Example reviewer ratings: {'Terminator': 4, 'Speed': 2, 'Aliens': 5, 'Point Break': 3, 'Red Dawn': 3, 'Blond on Blond': 4}
+// Example reviewer1 ratings: {'Terminator': 5, 'Speed': 3, 'Aliens': 5, 'Point Break': 2, 'Red Dawn': 2, 'Blond on Blond': 1};
+// Example reviewer2 ratings: {'Terminator': 4, 'Speed': 2, 'Aliens': 5, 'Point Break': 3, 'Red Dawn': 3, 'Blond on Blond': 4}
+
+
 
 function Cohen() {
 }; 
 
-Cohen.prototype.linear = function(user, reviewer) {
-  // Make sure there are some reviews. A better way would be to calculate p-value. Also,
-  // the function won't work with less than 2 reviews in reviewer. 
-  if (Object.keys(reviewer).length < 2) return "Not enough reviews.";  
-
+Cohen.prototype.linear = function(rater1, rater2, weights, numOfCategories) {
+  
   // Builds size x size matrix filled with defaultValue.
   function squareMatrix(size, defaultValue) {
     var ary = new Array(size);
@@ -29,39 +24,39 @@ Cohen.prototype.linear = function(user, reviewer) {
     return ary;
   };
 
-  var observed = squareMatrix(5, 0);
-  var hypothetical = squareMatrix(5, 0);
-  var weightMatrix = squareMatrix(5, 0);
+  var observed = squareMatrix(numOfCategories, 0);
+  var hypothetical = squareMatrix(numOfCategories, 0);
+  var weightMatrix = squareMatrix(numOfCategories, 0);
   
   
   // Build the matrix of observed agreements/disagreements
-  for (var movie in user) { 
-    if (user.hasOwnProperty(movie) && reviewer.hasOwnProperty(movie)) {
-      var userRating = user[movie] - 1;
-      var reviewerRating = reviewer[movie] - 1;
-      observed[userRating][reviewerRating] += 1;
+  for (var item in rater1) { 
+    if (rater1.hasOwnProperty(item) && rater2.hasOwnProperty(item)) {
+      var rater1Rating = rater1[item] - 1;  // Sub 1 to get location in 0-idx matrix.
+      var rater2Rating = rater2[item] - 1;
+      observed[rater1Rating][rater2Rating] += 1;
     };
   };
 
-  
-  function userTotals(stars, obs) {
-    stars = stars - 1;
-    var starTotal = obs[stars].reduce(function(sum, n) { return sum + n; });
-    return starTotal;
+  // Returns count of a given rating (eg, 1 star) for reviewer1
+  function rev1Totals(category, obs) {
+    category = category - 1;
+    var categoryTotal = obs[category].reduce(function(sum, n) { return sum + n; });
+    return categoryTotal;
   };
 
-  function revTotals(stars, obs) {
-    stars = stars - 1;
+  function rev2Totals(category, obs) {
+    category = category - 1;
     var count = 0;
     for (var i = 0; i < obs.length; i++) {
-      count += obs[i][stars];
+      count += obs[i][category];
     };
     return count;
   };
 
-  var totalReviews = 0;
-  for (stars = 1; stars < 6; stars++) {
-    totalReviews += userTotals(stars, observed);
+  var totalRatings = 0;
+  for (category = 1; category < numOfCategories; category++) {
+    totalRatings += rev1Totals(category, observed);
   };
   
   
@@ -70,8 +65,8 @@ Cohen.prototype.linear = function(user, reviewer) {
   for (var i = 0; i < observed.length; i++) {
     var row = observed[i];
     for (var j = 0; j < observed[i].length; j++) {
-      hypothetical[i][j] = (userTotals(i+1, observed)/totalReviews) *
-        (revTotals(j+1, observed)/totalReviews);
+      hypothetical[i][j] = (rev1Totals(i+1, observed)/totalRatings) *
+        (rev2Totals(j+1, observed)/totalRatings);
     };
   };
     
@@ -79,10 +74,14 @@ Cohen.prototype.linear = function(user, reviewer) {
 
   // Build weight matrix. Remember that the categories must start at 1, not 0, to compute
   // distances accurately. So add 1 to indexes to get category numbers. (Ie, index
-  // 0 is for the count of 1-star agreements.) 
+  // 0 is for the count of 1-star agreements.)  Defaults to linear weights. 
   for (i = 0; i < weightMatrix.length; i++) {
     for (j = 0; j < weightMatrix.length; j++) {
-      weightMatrix[i][j] = Math.abs((i+1) - (j+1));
+      if (weights == "squared") {
+        weightMatrix[i][j] = Math.pow((Math.abs((i+1) - (j+1))), 2);
+      } else {
+        weightMatrix[i][j] = Math.abs((i+1) - (j+1));
+      }
     };
   };
   
@@ -97,20 +96,22 @@ Cohen.prototype.linear = function(user, reviewer) {
     var denominator = 0;
     for (var i = 0; i < hypothetical.length; i++) {
       for (var j = 0; j < hypothetical.length; j++) {
-        denominator += hypothetical[i][j] * totalReviews * weightMatrix[i][j];
+        denominator += hypothetical[i][j] * totalRatings * weightMatrix[i][j];
       };
     };
     return 1 - (numerator / denominator);
   };
         
-  //return observed, rounded to 2 dec places;
+  //return kappa, rounded to 2 dec places;
   return Math.round(kappa()*100) / 100; 
 
 }
 
 
 
-Cohen.prototype.squared = function(user, reviewer) {
+Cohen.prototype.unweighted = function(rev1, rev2, numOfCategories) {
+  
+  // Builds size x size matrix filled with defaultValue.
   function squareMatrix(size, defaultValue) {
     var ary = new Array(size);
     for (var i = 0; i < size; i++) {
@@ -122,99 +123,83 @@ Cohen.prototype.squared = function(user, reviewer) {
     return ary;
   };
 
-  var observed = squareMatrix(5, 0);
-  var hypothetical = squareMatrix(5, 0);
-  var weightMatrix = squareMatrix(5, 0);
+  var observed = squareMatrix(numOfCategories, 0);
+  var hypothetical = squareMatrix(numOfCategories, 0);
+  var weightMatrix = squareMatrix(numOfCategories, 0);
   
   
   // Build the matrix of observed agreements/disagreements
-  for (var movie in user) { 
-    if (user.hasOwnProperty(movie) && reviewer.hasOwnProperty(movie)) {
-      var userRating = user[movie] - 1;
-      var reviewerRating = reviewer[movie] - 1;
-      observed[userRating][reviewerRating] += 1;
+  for (var item in rater1) { 
+    if (rater1.hasOwnProperty(item) && rater2.hasOwnProperty(item)) {
+      var rater1Rating = rater1[item] - 1;  // Sub 1 to get location in 0-idx matrix.
+      var rater2Rating = rater2[item] - 1;
+      observed[rater1Rating][rater2Rating] += 1;
     };
   };
 
-  
-  function userTotals(stars, obs) {
-    stars = stars - 1;
-    var starTotal = obs[stars].reduce(function(sum, n) { return sum + n; });
-    return starTotal;
+  // Returns count of a given rating (eg, 1 star) for reviewer1
+  function rev1Totals(category, obs) {
+    category = category - 1;
+    var categoryTotal = obs[category].reduce(function(sum, n) { return sum + n; });
+    return categoryTotal;
   };
 
-  function revTotals(stars, obs) {
-    stars = stars - 1;
+  function rev2Totals(category, obs) {
+    category = category - 1;
     var count = 0;
     for (var i = 0; i < obs.length; i++) {
-      count += obs[i][stars];
+      count += obs[i][category];
     };
     return count;
   };
 
-  var totalReviews = 0;
-  for (stars = 1; stars < 6; stars++) {
-    totalReviews += userTotals(stars, observed);
+  var totalRatings = 0;
+  for (category = 1; category < numOfCategories; category++) {
+    totalRatings += rev1Totals(category, observed);
   };
   
   
 
-  // Build matrix of hypothetical agreements/disagreements by chance 
+  // Build matrix of hypothetical agreements/disagreements by chance. You don't
+  // have to actually build the fill matrix here, just the diagonal.  
   for (var i = 0; i < observed.length; i++) {
-    var row = observed[i];
-    for (var j = 0; j < observed[i].length; j++) {
-      hypothetical[i][j] = (userTotals(i+1, observed)/totalReviews) *
-        (revTotals(j+1, observed)/totalReviews);
-    };
+      hypothetical[i][i] = (rev1Totals(i+1, observed)/totalRatings) *
+        (rev2Totals(i+1, observed)/totalRatings);
+  };
+
+  // Count agreements. 
+  function agree(matrix) {
+    var agrees = 0
+    for (var i = 0; i < obs.length; i++) {
+      agrees += obs[i][i];
+    }
+    return agrees;
   };
     
-  
-
-  // Build weight matrix. Remember that the categories must start at 1, not 0, to compute
-  // distances accurately. So add 1 to indexes to get category numbers. (Ie, index
-  // 0 is for the count of 1-star agreements.) 
-  for (i = 0; i < weightMatrix.length; i++) {
-    for (j = 0; j < weightMatrix.length; j++) {
-      weightMatrix[i][j] = Math.pow((Math.abs((i+1) - (j+1))), 2);
-    };
-  };
-  
-  // Computes Kappa from observed, hyp, and weights. 
   function kappa() {
-    var numerator = 0;
-    for (var i = 0; i<observed.length; i++) {
-      for (var j = 0; j<observed.length; j++) {
-        numerator += observed[i][j] * weightMatrix[i][j];
-      };
-    };
-    var denominator = 0;
-    for (var i = 0; i < hypothetical.length; i++) {
-      for (var j = 0; j < hypothetical.length; j++) {
-        denominator += hypothetical[i][j] * totalReviews * weightMatrix[i][j];
-      };
-    };
-    return 1 - (numerator / denominator);
+    obsAgreement = agree(observed) / totalRatings;
+    hypAgreement = agree(hypothetical);
+
+    var k = (obsAgreement - hypAgreement) / (1 - hypAgreement);
+
+    return k;
   };
-        
-  //return observed, rounded to 2 dec places;
+
   return Math.round(kappa()*100) / 100; 
 
-}
-
-
-Cohen.prototype.unweighted = function(user, reviewer) {
 };
 
-Cohen.prototype.kappa = function(user, reviewer, weights) {
-  if (weights == undefined) {
-    return this.unweighted(user, reviewer);
-  } else if (weights == "none") {
-    return this.unweighted(user, reviewer);
-  } else if (weights == "linear") {
-    return this.linear(user, reviewer);
+Cohen.prototype.kappa = function(reviewer1, reviewer2, numOfCategories, weights) {
+  if (Object.keys(user).length < 2 || Object.keys(reviewer).length < 2) {
+    return new Error("Each rater must have >1 rating.");
   }
-  else if (weights == "squared") {
-    return this.squared(user, reviewer);
+
+  if (weights == undefined) {
+    return this.unweighted(reviewer1, reviewer2, numOfCategories);
+  } else if (weights == "none") {
+    return this.unweighted(reviewer1, reviewer2);
+  } else if (weights == "linear" || weights == "squared") {
+    return this.linear(reviewer1, reviewer2, weights, numOfCategories);
   } else {
     return new Error("Invalid weight param: Weight must be \'none\', \'linear\', or \'squared\'");
   }
@@ -223,7 +208,7 @@ Cohen.prototype.kappa = function(user, reviewer, weights) {
 
 
 
-var kappa = new Cohen();
-module.exports = kappa;
+var c = new Cohen();
+module.exports = c;
 
 
