@@ -10,7 +10,7 @@
 function Cohen() {
 }; 
 
-Cohen.prototype.linear = function(rater1, rater2, weights, numOfCategories) {
+Cohen.prototype.weighted = function(rater1, rater2, weights, numOfCategories) {
   
   // Builds size x size matrix filled with defaultValue.
   function squareMatrix(size, defaultValue) {
@@ -109,7 +109,7 @@ Cohen.prototype.linear = function(rater1, rater2, weights, numOfCategories) {
 
 
 
-Cohen.prototype.unweighted = function(rev1, rev2, numOfCategories) {
+Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
   
   // Builds size x size matrix filled with defaultValue.
   function squareMatrix(size, defaultValue) {
@@ -170,8 +170,8 @@ Cohen.prototype.unweighted = function(rev1, rev2, numOfCategories) {
   // Count agreements. 
   function agree(matrix) {
     var agrees = 0
-    for (var i = 0; i < obs.length; i++) {
-      agrees += obs[i][i];
+    for (var i = 0; i < matrix.length; i++) {
+      agrees += matrix[i][i];
     }
     return agrees;
   };
@@ -190,16 +190,16 @@ Cohen.prototype.unweighted = function(rev1, rev2, numOfCategories) {
 };
 
 Cohen.prototype.kappa = function(reviewer1, reviewer2, numOfCategories, weights) {
-  if (Object.keys(user).length < 2 || Object.keys(reviewer).length < 2) {
+  if (Object.keys(reviewer1).length < 2 || Object.keys(reviewer2).length < 2) {
     return new Error("Each rater must have >1 rating.");
   }
 
   if (weights == undefined) {
     return this.unweighted(reviewer1, reviewer2, numOfCategories);
   } else if (weights == "none") {
-    return this.unweighted(reviewer1, reviewer2);
+    return this.unweighted(reviewer1, reviewer2, numOfCategories);
   } else if (weights == "linear" || weights == "squared") {
-    return this.linear(reviewer1, reviewer2, weights, numOfCategories);
+    return this.weighted(reviewer1, reviewer2, weights, numOfCategories);
   } else {
     return new Error("Invalid weight param: Weight must be \'none\', \'linear\', or \'squared\'");
   }
@@ -207,21 +207,23 @@ Cohen.prototype.kappa = function(reviewer1, reviewer2, numOfCategories, weights)
 }
 
 
-// Convert nominal categories to numeric before computing kappa. 
+// Convert nominal categories to numeric before computing kappa. Nominal categories
+// must be in order. 
 Cohen.prototype.nominalConversion = function(nominalCats, nominalRatings) {
-  var conversion = Object.create(null);
+  var conversion = {};
   for (var i = 0; i < nominalCats.length; i++) {
     var numeric = i + 1;
-    conversion[nominalCats[i]] = numeric;
+    var cat = nominalCats[i]
+    conversion[cat] = numeric;
   };
 
-  var numericRatings = Object.create(null);
+  var numericRatings = {};
   for (item in nominalRatings) {
-    if (!conversion.hasOwnProperty(item)) {
+    if (!conversion.hasOwnProperty(nominalRatings[item])) {
       return new Error("Category array must contain all categories.");
-    }
+    } 
 
-    var number = conversion[item];
+    var number = conversion[nominalRatings[item]];
     numericRatings[item] = number;
   };
 
