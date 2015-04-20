@@ -100,9 +100,6 @@ Cohen.prototype.weighted = function(rater1, rater2, weights, numOfCategories) {
     return ((propObs - propHyp) / (1 - propHyp));
   };
     
-  //console.log(observed);
-  //console.log(hypothetical);
-  //console.log(weightMatrix);
   //return kappa, rounded to 2 dec places;
   return Math.round(kappa()*100) / 100; 
 
@@ -180,14 +177,9 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
     hypAgreement = agree(hypothetical);
 
     var k = (obsAgreement - hypAgreement) / (totalRatings - hypAgreement);
-    console.log(obsAgreement);
-    console.log(hypAgreement);
     return k;
   };
 
-  //console.log(observed);
-  //console.log(hypothetical);
-  //console.log(totalRatings);
   return Math.round(kappa()*100) / 100; 
 
 };
