@@ -55,7 +55,7 @@ Cohen.prototype.weighted = function(rater1, rater2, weights, numOfCategories) {
   };
 
   var totalRatings = 0;
-  for (category = 1; category < numOfCategories; category++) {
+  for (category = 1; category <= numOfCategories; category++) {
     totalRatings += rev1Totals(category, observed);
   };
   
@@ -63,10 +63,8 @@ Cohen.prototype.weighted = function(rater1, rater2, weights, numOfCategories) {
 
   // Build matrix of hypothetical agreements/disagreements by chance 
   for (var i = 0; i < observed.length; i++) {
-    var row = observed[i];
     for (var j = 0; j < observed[i].length; j++) {
-      hypothetical[i][j] = (rev1Totals(i+1, observed)/totalRatings) *
-        (rev2Totals(j+1, observed)/totalRatings);
+      hypothetical[i][j] = (rev1Totals(i+1, observed) * rev2Totals(j+1, observed)) / totalRatings;
     };
   };
     
@@ -78,30 +76,33 @@ Cohen.prototype.weighted = function(rater1, rater2, weights, numOfCategories) {
   for (i = 0; i < weightMatrix.length; i++) {
     for (j = 0; j < weightMatrix.length; j++) {
       if (weights == "squared") {
-        weightMatrix[i][j] = Math.pow((Math.abs((i+1) - (j+1))), 2);
+        weightMatrix[i][j] = 1 - (Math.pow((i+1) - (j+1), 2) / Math.pow((numOfCategories-1), 2));
       } else {
-        weightMatrix[i][j] = Math.abs((i+1) - (j+1));
+        weightMatrix[i][j] = 1 - (Math.abs((i+1) - (j+1)) / (numOfCategories - 1));
       }
     };
   };
   
   // Computes Kappa from observed, hyp, and weights. 
   function kappa() {
-    var numerator = 0;
+    var propObs = 0;
     for (var i = 0; i<observed.length; i++) {
-      for (var j = 0; j<observed.length; j++) {
-        numerator += observed[i][j] * weightMatrix[i][j];
+      for (var j = 0; j<observed[i].length; j++) {
+        propObs += (observed[i][j] / totalRatings) * weightMatrix[i][j];
       };
     };
-    var denominator = 0;
+    var propHyp = 0;
     for (var i = 0; i < hypothetical.length; i++) {
-      for (var j = 0; j < hypothetical.length; j++) {
-        denominator += hypothetical[i][j] * totalRatings * weightMatrix[i][j];
+      for (var j = 0; j < hypothetical[i].length; j++) {
+        propHyp += (hypothetical[i][j] / totalRatings) * weightMatrix[i][j];
       };
     };
-    return 1 - (numerator / denominator);
+    return ((propObs - propHyp) / (1 - propHyp));
   };
-        
+    
+  //console.log(observed);
+  //console.log(hypothetical);
+  //console.log(weightMatrix);
   //return kappa, rounded to 2 dec places;
   return Math.round(kappa()*100) / 100; 
 
@@ -125,7 +126,6 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
 
   var observed = squareMatrix(numOfCategories, 0);
   var hypothetical = squareMatrix(numOfCategories, 0);
-  var weightMatrix = squareMatrix(numOfCategories, 0);
   
   
   // Build the matrix of observed agreements/disagreements
@@ -154,7 +154,7 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
   };
 
   var totalRatings = 0;
-  for (category = 1; category < numOfCategories; category++) {
+  for (category = 1; category <= numOfCategories; category++) {
     totalRatings += rev1Totals(category, observed);
   };
   
@@ -163,8 +163,7 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
   // Build matrix of hypothetical agreements/disagreements by chance. You don't
   // have to actually build the fill matrix here, just the diagonal.  
   for (var i = 0; i < observed.length; i++) {
-      hypothetical[i][i] = (rev1Totals(i+1, observed)/totalRatings) *
-        (rev2Totals(i+1, observed)/totalRatings);
+      hypothetical[i][i] = (rev1Totals(i+1, observed) * rev2Totals(i+1, observed)) / totalRatings;
   };
 
   // Count agreements. 
@@ -177,14 +176,18 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
   };
     
   function kappa() {
-    obsAgreement = agree(observed) / totalRatings;
+    obsAgreement = agree(observed);
     hypAgreement = agree(hypothetical);
 
-    var k = (obsAgreement - hypAgreement) / (1 - hypAgreement);
-
+    var k = (obsAgreement - hypAgreement) / (totalRatings - hypAgreement);
+    console.log(obsAgreement);
+    console.log(hypAgreement);
     return k;
   };
 
+  //console.log(observed);
+  //console.log(hypothetical);
+  //console.log(totalRatings);
   return Math.round(kappa()*100) / 100; 
 
 };
