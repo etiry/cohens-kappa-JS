@@ -24,9 +24,9 @@ var kL = Cohen.kappa(rev1, rev2, 5, 'linear');
 var kS = Cohen.kappa(rev1, rev2, 5, 'squared');
 var kU = Cohen.kappa(rev1, rev2, 5, 'none'); 
 
-console.log("Linear weights: " + kL);
-console.log("Squared weights: " + kS);
-console.log("Unweighted: " + kU);
+console.log("Linear weights: " + kL);   // Should be 0.028 (rounded to .03). 
+console.log("Squared weights: " + kS);  // should be 0.167. 
+console.log("Unweighted: " + kU);         // Should be -0.14
 
 
 
@@ -60,12 +60,12 @@ var diagnoses2 = {
   L: 'benign'
 };
 
-var numeric1 = Cohen.nominalConversion(['benign', 'malignant'], diagnoses1);
-var numeric2 = Cohen.nominalConversion(['benign', 'malignant'], diagnoses2);
+//var numeric1 = Cohen.nominalConversion(['benign', 'malignant'], diagnoses1);
+//var numeric2 = Cohen.nominalConversion(['benign', 'malignant'], diagnoses2);
 
-var kappDiagnose = Cohen.kappa(numeric1, numeric2, 2, 'none'); 
+//var kappDiagnose = Cohen.kappa(numeric1, numeric2, 2, 'none'); 
 
-console.log("Converted nominal diagnoses, unweighted: " + kappDiagnose);
+//console.log("Converted nominal diagnoses, unweighted: " + kappDiagnose);
 
 
 
