@@ -196,9 +196,8 @@ Cohen.prototype.kappa = function(reviewer1, reviewer2, numOfCategories, weights)
   } else if (weights == "linear" || weights == "squared") {
     return this.weighted(reviewer1, reviewer2, weights, numOfCategories);
   } else {
-    return new Error("Invalid weight param: Weight must be \'none\', \'linear\', or \'squared\'");
+    throw new Error("Invalid weight param: Weight must be \'none\', \'linear\', or \'squared\'");
   }
-   
 }
 
 
@@ -215,7 +214,7 @@ Cohen.prototype.nominalConversion = function(nominalCats, nominalRatings) {
   var numericRatings = {};
   for (item in nominalRatings) {
     if (!conversion.hasOwnProperty(nominalRatings[item])) {
-      return new Error("Category array must contain all categories.");
+      throw new Error("Category array must contain all categories.");
     } 
 
     var number = conversion[nominalRatings[item]];
