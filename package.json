@@ -1,0 +1,8 @@
+{
+  "name": "cohens-kappa",
+  "version": "0.1.0",
+  "description": "Computes Cohen's kappa.",
+  "author": "Aaron Norby",
+  "main": "cohens_kappa.js"
+}
+
