@@ -16,7 +16,7 @@ than others (you give it 5 stars and I give it 1).
 CKJS is written entirely in javascript and can be used in the
 browser. 
 
-## How to interpret kappa ## 
+## How to interpret kappa  
 If you are unfamiliar with kappa statistics, this is a very brief overview of what
 they are. In essence, kappa is computed by first calculating how much agreement
 there is between two reviewers and how much agreement we would expect to find due
@@ -150,7 +150,7 @@ console.log("Unweighted kappa: " + kappaUnweighted);
 ```
 ---------------
 
-## What CKJS doesn't do (yet) ## 
+## What CKJS doesn't do (yet)  
 
 Right now, there is no functionality for computing *p*-values or confidence intervals
 for *k*. However, these are planned features.  

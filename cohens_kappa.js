@@ -1,9 +1,12 @@
-// Assumption about format of data: 'reviewer1' and 'reviewer2' should each be JSON objects
-// with reviewed items as keys and numerical ratings as values. Important that the ratings
-// be typed as numbers. 
+/** Cohen's Kappa.  Javascript module for computing Cohen's kappa and Cohen's weighted kappa.
+ * version 0.1.0. 
+ * Author: Aaron Norby
+ *
+ * Assumption about format of data: 'reviewer1' and 'reviewer2' should each be JSON objects
+ * with reviewed items as keys and numerical ratings as values. Important that the ratings
+ * be typed as numbers. 
+ */
 
-// Example reviewer1 ratings: {'Terminator': 5, 'Speed': 3, 'Aliens': 5, 'Point Break': 2, 'Red Dawn': 2, 'Blond on Blond': 1};
-// Example reviewer2 ratings: {'Terminator': 4, 'Speed': 2, 'Aliens': 5, 'Point Break': 3, 'Red Dawn': 3, 'Blond on Blond': 4}
 
 
 
