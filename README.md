@@ -161,8 +161,7 @@ supported in the future as well.
 
 ## Testing 
 
-There is not yet automated testing. Instead, there are two files in the `tests`
-folder that will help confirm that CKJS works. 
+There is not yet automated testing. Instead, there are two files that will help confirm that CKJS works. 
 
 The first is `kappa_script.R`. The point of this script is to confirm that CKJS
 computes kappa statistics accurately.  You shouldn't take my word for it.  If you
