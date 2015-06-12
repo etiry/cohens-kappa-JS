@@ -13,9 +13,6 @@ weights are supported. The advantage of weighted kappa is that it counts some
 disagreements (you give a restaurant 5 stars, I give it 4) as less disagree-ing
 than others (you give it 5 stars and I give it 1). 
 
-CKJS is written entirely in javascript and can be used in the
-browser. 
-
 ## How to interpret kappa  
 If you are unfamiliar with kappa statistics, this is a very brief overview of what
 they are. In essence, kappa is computed by first calculating how much agreement
