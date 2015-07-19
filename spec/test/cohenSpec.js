@@ -20,6 +20,14 @@ var rev2 = {
   'Rambo': 3
 };
 
+var rev3 = {
+  'dog': 'friendly',
+  'cat': 'friendly',
+  'octopus': 'unknown',
+  'octocat': 'friendly',
+  'cobra': 'unfriendly',
+  'The Predator': 'unfriendly'
+};
 
 describe('#kappa', function() {
   it('should compute kappa with linear weights', function() {
@@ -35,3 +43,11 @@ describe('#kappa', function() {
   });
 
 }); 
+
+describe('#nominalConversion', function() {
+  it('should convert nominal categories to numbers', function() {
+    var categories = ['unfriendly', 'unknown', 'friendly'];
+    var rev3numeric = Cohen.nominalConversion(categories, rev3);
+    expect(typeof rev3numeric.octocat).toBe('number');
+  });    
+});
