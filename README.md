@@ -147,6 +147,20 @@ console.log("Unweighted kappa: " + kappaUnweighted);
 ```
 ---------------
 
+## Testing 
+
+If you have node and jasmine installed, you can run the tests by typing `jasmine`
+from the `cohens-kappa` directory. 
+
+The values for the tests are derived from computing *k* using R. You can find a an
+R script for doing this in `spec/kappa_script.R`. This script uses the package
+`irr` to compute *k* and the package `jsonlite` to convert JSON strings into
+R-style data structures. Its usage is documented in comments. 
+
+In addition, `example.js`, contains several example usages of CKJS along with the
+output they should produce. You can simply run the code and confirm that it puts
+out what it's supposed to.
+
 ## What CKJS doesn't do (yet)  
 
 Right now, there is no functionality for computing *p*-values or confidence intervals
@@ -156,19 +170,7 @@ There is also no support for custom weighting schemes. Linear, squared, and
 unweighted should be enough for most purposes, although custom weights may be
 supported in the future as well. 
 
-## Testing 
 
-There is not yet automated testing. Instead, there are two files that will help confirm that CKJS works. 
 
-The first is `kappa_script.R`. The point of this script is to confirm that CKJS
-computes kappa statistics accurately.  You shouldn't take my word for it.  If you
-need to trust someone, trust one of the major statistical computing communities
-(R).  If you know R, you can simply plug in your reviewer data and run the script.
-It uses the package `irr` to compute kappa, and the package `jsonlite` to convert
-JSON strings into R-style data structures. Its usage is documented in comments.
-
-The second, `example.js`, contains several example usages of CKJS along with the
-output they should produce. You can simply run the code and confirm that it puts
-out what it's supposed to. 
 
 
