@@ -154,7 +154,7 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
   }
 
   var totalRatings = 0;
-  for (category = 1; category <= numOfCategories; category++) {
+  for (var category = 1; category <= numOfCategories; category++) {
     totalRatings += rev1Totals(category, observed);
   }
   
