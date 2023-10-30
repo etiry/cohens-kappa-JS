@@ -176,8 +176,8 @@ Cohen.prototype.unweighted = function(rater1, rater2, numOfCategories) {
   }
     
   function kappa() {
-    obsAgreement = agree(observed);
-    hypAgreement = agree(hypothetical);
+    var obsAgreement = agree(observed);
+    var hypAgreement = agree(hypothetical);
 
     var k = (obsAgreement - hypAgreement) / (totalRatings - hypAgreement);
     return k;
